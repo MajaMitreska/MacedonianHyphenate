@@ -1,9 +1,12 @@
+import itertools
+
 import nltk
 
 import pickle as p
 import math
 import pandas as pd
 from collections import deque
+import re
 
 consonants = ['б', 'в', 'г', 'д', 'ѓ', 'ж', 'з', 'ѕ', 'ј', 'к', 'л', 'љ', 'м', 'н', 'њ', 'п', 'р', 'с', 'т', 'ќ', 'ф',
               'х', 'ц', 'ч', 'џ', 'ш']
@@ -158,23 +161,53 @@ def hyphenate_syllables(syllables):
     return print_string
 
 
+def split_by_sufiks(word, sufiks):
+    position = word.find(sufiks)
+    start = position
+    end = len(sufiks)
+    return [word[0:start], word[start:start + end], word[start + end:]]
+
+
+def check_for_two_sufiksi(word, sufiksi):
+    pairs = list(itertools.combinations(sufiksi, 2))
+    for pair in pairs:
+        if all(x in word for x in pair):
+            return True, pair
+    return False, tuple()
+
+
 def check_for_ski_stvo_stven(word):
-    sufiksi = ['ски', 'ство', 'ствен']
+    sufiksi = ['што', 'ски', 'ство', 'ствен']
+    two_sufiksi, pair = check_for_two_sufiksi(word, sufiksi)
     for sufiks in sufiksi:
-        if sufiks in word:
-            position = word.find(sufiks)
-            start = position
-            end = len(sufiks)
-            return [word[0:start], word[start:start + end], word[start + end:]]
+        if (sufiks == 'ски' and sufiks in word) or (sufiks == 'ство' and sufiks in word):
+            return split_by_sufiks(word, sufiks)
+        if (sufiks == 'ствен' and sufiks in word):
+            return [split_by_sufiks(word, sufiks), [word]]
+        if (sufiks == 'што' and sufiks in word) and two_sufiksi:
+            splitted_string = split_by_sufiks(word, sufiks)
+            second_sufiks = pair[1 - pair.index('што')]
+            modifed_string = splitted_string[:-1]
+            modifed_string.extend(split_by_sufiks(splitted_string[-1], second_sufiks))
+            return [modifed_string, split_by_sufiks(word, second_sufiks)]
+        if (sufiks == 'што' and sufiks in word):
+            return [split_by_sufiks(word, sufiks), [word]]
 
 
-def check_for_prefiksi(word):
-    prefiksi = ['пред', 'над', 'екс', 'нај', 'на', 'по', 'се', 'пре', 'из', 'за', 'до']
-    for prefiks in prefiksi:
-        if prefiks in word:
-            len_prefiks = len(prefiks)
-            return [word[0:len_prefiks], word[len_prefiks:]]
-
+def check_for_prefiksi(word, prefiksi):
+  for prefiks in prefiksi:
+    two_syllabel_prefix = False
+    if word.startswith(prefiks):
+      letters_dict = name_each_letter(list(prefiks))
+      letters_dict = check_for_samoglasno_r(letters_dict)
+      number_of_vowels = count_vowels(letters_dict)
+      len_prefiks = len(prefiks)
+      if number_of_vowels >= 2:
+        two_syllabel_prefix = True
+        syllables =  hyphenate_syllables(split_into_syllables(prefiks))
+        return [syllables, word[len_prefiks:]], two_syllabel_prefix
+      else:
+        return [word[0:len_prefiks], word[len_prefiks:]], two_syllabel_prefix
 
 def check_for_exceptions(word: str) -> str:
     prefiksi = ('пред', 'над', 'нај', 'на', 'по', 'се', 'пре', 'из', 'екс', 'за', 'до')
@@ -234,10 +267,83 @@ def check_for_exceptions_1(word):
     return hyphenate_string.strip('-')
 
 
+def check_for_exceptions_2(word):
+    prefiksi = (
+    'против', 'пред', 'прет', 'пре', 'над', 'нај', 'над', 'нат', 'на', 'не', 'ни', 'обез', 'по', 'се', 'пре', 'из',
+    'до', 'баш', 'без', 'бес', 'благо', 'бе', 'високо', 'вон', 'едно', 'жолто', 'за', 'зат', 'зелено', 'ис', 'едно',
+    'зад', 'казнено', 'кусо', 'меѓу', 'многу', 'обес', 'оловно', 'пет', 'повеќе', 'подиз', 'под', 'пот', 'поизна',
+    'поиз', 'полу', 'поне', 'пораз', 'порас', 'прaво', 'прво', 'прa', 'при', 'про', 'разно', 'раз', 'рас', 'рамно',
+    'само', 'светло', 'себе', 'сино', 'ситно', 'сребро', 'слабо', 'танко', 'тенко', 'темно', 'три', 'триста', 'широко', 'брзо')
+
+    sufiksi = ('ски', 'ство', 'ствен', 'што')
+
+    has_prefiks = any(s in word for s in prefiksi)
+    has_sufiks = any(s in word for s in sufiksi)
+
+    divided_strings = []
+    if word.startswith(prefiksi):
+        prefiksi_divided_strings, two_syllabel_prefix = check_for_prefiksi(word, prefiksi)
+
+        if not two_syllabel_prefix:
+            divided_strings.append([word])
+
+        prefiks = prefiksi_divided_strings[0]
+        prefiksi_divided_strings.pop(0)
+
+        for substring in prefiksi_divided_strings:
+            if has_sufiks:
+                sufiksi_divided_strings = check_for_ski_stvo_stven(substring)
+                two_versions = all(isinstance(n, list) for n in sufiksi_divided_strings)
+                if two_versions:
+                    for sufiksi_substring in sufiksi_divided_strings:
+                        prefiks_sufiksi_substring = [prefiks]
+                        prefiks_sufiksi_substring.extend(sufiksi_substring)
+                        divided_strings.append(prefiks_sufiksi_substring)
+                else:
+                    prefiks_sufiksi_substring = [prefiks]
+                    prefiks_sufiksi_substring.extend(prefiksi_divided_strings)
+                    divided_strings.append(prefiks_sufiksi_substring)
+
+            else:
+                prefiks_sufiksi_substring = [prefiks]
+                prefiks_sufiksi_substring.extend(prefiksi_divided_strings)
+                divided_strings.append(prefiks_sufiksi_substring)
+
+    elif has_sufiks:
+        sufiksi_divided_strings = check_for_ski_stvo_stven(word)
+        for sufiksi_substring in sufiksi_divided_strings:
+            divided_strings.append(sufiksi_substring)
+    else:
+        divided_strings.append(word)
+
+    two_versions = all(isinstance(n, list) for n in divided_strings)
+    versions = []
+    hyphenate_string = ''
+
+    if two_versions:
+        for version in divided_strings:
+            hyphenate_string = ''
+            for substring in version:
+                hyphenate_string += hyphenate_syllables(split_into_syllables(substring)) + '-'
+            versions.append(hyphenate_string)
+    else:
+        for substring in divided_strings:
+            hyphenate_string += hyphenate_syllables(split_into_syllables(substring)) + '-'
+        versions.append(hyphenate_string)
+
+    for i in range(len(versions)):
+        v = versions[i]
+        hyphenate_string = v.strip('-')
+        hyphenate_string = re.sub('--', '-', hyphenate_string)
+        versions[i] = hyphenate_string
+
+    return set(versions)
+
+
 class SplitIntoSyllables:
 
     #def __init__(self):
 
     @staticmethod
     def hyphenate(word):
-        print(check_for_exceptions_1(word))
+        print(check_for_exceptions_2(word))

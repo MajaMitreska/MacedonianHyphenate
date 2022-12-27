@@ -10,7 +10,7 @@ import pickle as p
 if __name__ == '__main__':
 
     splitter = SplitIntoSyllables()
-    splitter.hyphenate("пример")
+    splitter.hyphenate("предодреден")
 
 
 
