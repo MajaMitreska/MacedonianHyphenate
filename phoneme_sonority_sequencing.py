@@ -1,4 +1,4 @@
-from syllabels import name_each_letter, check_for_samoglasno_r, check_for_two_continuous_vowels
+from syllabels import name_each_letter, check_for_samoglasno_r
 
 phoneme_weights = {
     'А': 12,
@@ -38,8 +38,20 @@ phoneme_weights = {
 }
 
 
+def check_for_two_continuous_vowels_2(letters_dict):
+    check = False
+    position = -1
+    for i in range(len(letters_dict) - 1):
+        type_letter_1 = letters_dict[i][1]
+        type_letter_2 = letters_dict[i + 1][1]
+        if type_letter_1 == type_letter_2 == 'vowel':
+            check = True
+            position = i + 1
+    return check, position
+
+
 def append_special_characters(word, letters_dict):
-    check, position = check_for_two_continuous_vowels(letters_dict)
+    check, position = check_for_two_continuous_vowels_2(letters_dict)
     if check:
         word = ''.join(word[:position]) + 'F' + ''.join(word[position:])
     return 'S' + word + 'S'
