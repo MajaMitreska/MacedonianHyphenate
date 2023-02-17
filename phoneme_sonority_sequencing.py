@@ -1,4 +1,5 @@
-from syllabels import name_each_letter, check_for_samoglasno_r
+from utils import name_each_letter
+from utils import check_for_samoglasno_r
 
 phoneme_weights = {
     'А': 12,
@@ -10,7 +11,7 @@ phoneme_weights = {
     'Е': 12,
     'Ж': 2,
     'З': 2,
-    "S": 2,
+    "Ѕ": 2,
     'И': 12,
     'Ј': 3,
     'К': 1,
@@ -33,8 +34,9 @@ phoneme_weights = {
     'Џ': 2,
     'Ш': 1,
     'F': 0,
-    "S": 0,
+    'S': 0,
     "'": 0,
+    "`": 0,
 }
 
 
@@ -87,7 +89,7 @@ def sonority_differences(weights):
     return differences
 
 
-def find_position_of_vowels(triplet_difference):
+def find_position_of_vowels_in_triplets(triplet_difference):
     temp_list = [0]
     temp_list.extend(triplet_difference)
     temp_list.append(0)

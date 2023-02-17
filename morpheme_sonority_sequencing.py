@@ -1,23 +1,23 @@
-from syllabels import split_by_sufiks, check_for_two_sufiksi
+from utils import split_by_suffix, check_for_two_suffixes
 from phoneme_sonority_sequencing import find_clusters, add_hyphen
 
 
 def check_for_ski_stvo_stven_2(word):
     suffixes = ['што', 'ски', 'ство', 'ствен']
-    two_suffixes, pair = check_for_two_sufiksi(word, suffixes)
+    two_suffixes, pair = check_for_two_suffixes(word, suffixes)
     for suffix in suffixes:
         if (suffix == 'ски' and suffix in word) or (suffix == 'ство' and suffix in word):
-            return split_by_sufiks(word, suffix)
+            return split_by_suffix(word, suffix)
         if suffix == 'ствен' and suffix in word:
-            return split_by_sufiks(word, suffix)
+            return split_by_suffix(word, suffix)
         if (suffix == 'што' and suffix in word) and two_suffixes:
-            split_string = split_by_sufiks(word, suffix)
+            split_string = split_by_suffix(word, suffix)
             second_suffix = pair[1 - pair.index('што')]
             modified_string = split_string[:-1]
-            modified_string.extend(split_by_sufiks(split_string[-1], second_suffix))
+            modified_string.extend(split_by_suffix(split_string[-1], second_suffix))
             return modified_string
         if suffix == 'што' and suffix in word:
-            return split_by_sufiks(word, suffix)
+            return split_by_suffix(word, suffix)
 
 
 def check_for_prefixes_2(word, prefixes):
@@ -43,7 +43,7 @@ def morpheme_SSP(word):
     suffixes = ('ски', 'ство', 'ствен', 'што')
 
     has_prefix = any(word.startswith(p) for p in prefixes)
-    has_sufix = any(s in word for s in suffixes)
+    has_suffix = any(s in word for s in suffixes)
 
     divided_strings = []
 
@@ -63,7 +63,7 @@ def morpheme_SSP(word):
             divided_strings.append(remainder_of_word)
 
     # suffixes
-    elif has_sufix:
+    elif has_suffix:
         suffixes_divided_strings = check_for_ski_stvo_stven_2(word)
         suffixes_divided_strings = clean_list(suffixes_divided_strings)
         divided_strings.extend(suffixes_divided_strings)
