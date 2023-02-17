@@ -68,4 +68,4 @@ class RuleBasedMorphemeSyllabification:
     # def __init__(self):
     @staticmethod
     def split(word):
-        return "".join(morpheme_rule_based(word))
+        return ", ".join(morpheme_rule_based(word))

@@ -49,4 +49,4 @@ class RuleBasedPhonemeSyllabification:
     # def __init__(self):
     @staticmethod
     def split(word):
-        return "".join(phoneme_rule_based(word))
+        return ", ".join(phoneme_rule_based(word))
