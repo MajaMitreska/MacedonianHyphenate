@@ -99,15 +99,16 @@ def find_position_of_vowels_in_triplets(triplet_difference):
 # longest strictly monotonic decreasing sequence
 def lsmds(arr, triplet_difference):
     new_list = [0] * len(arr)
-    for i in range(len(arr) - 1):
-        if arr[i] > arr[i + 1]:
-            new_list[i] = True
+    if triplet_difference:
+        for i in range(len(arr) - 1):
+            if arr[i] > arr[i + 1]:
+                new_list[i] = True
+            else:
+                new_list[i] = False
+        if triplet_difference[-1] > 0:
+            new_list[-1] = True
         else:
-            new_list[i] = False
-    if triplet_difference[-1] > 0:
-        new_list[-1] = True
-    else:
-        new_list[-1] = False
+            new_list[-1] = False
     return new_list
 
 
@@ -168,7 +169,9 @@ def find_clusters(word):
 
 
 def add_hyphen(list_of_syllables):
-    return '-'.join(list_of_syllables)
+    syllables = '-'.join(list_of_syllables)
+    syllables = syllables.strip('-')
+    return syllables
 
 
 def phoneme_SSP(word):
