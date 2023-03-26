@@ -1,7 +1,9 @@
-from utils import check_for_prefixes, check_for_ski_stvo_stven, check_for_multiple_versions, iterate_strings, merging_syllables, clean_output
+from utils import check_for_prefixes, check_for_ski_stvo_stven, check_for_multiple_versions, iterate_strings, \
+    merging_syllables, clean_output, check_for_one_syllable_word
 
 
 def morpheme_rule_based(word):
+
     prefixes = {
         'ис', 'против', 'пред', 'прет', 'пре', 'над', 'нај', 'над', 'нат', 'на', 'не', 'ни', 'обез', 'по', 'се', 'пре',
         'из', 'до', 'баш', 'без', 'бес', 'благо', 'бе', 'високо', 'вон', 'едно', 'жолто', 'за', 'зат', 'зелено', 'едно',
@@ -68,4 +70,7 @@ class RuleBasedMorphemeSyllabification:
     # def __init__(self):
     @staticmethod
     def split(word):
-        return ", ".join(morpheme_rule_based(word))
+        if check_for_one_syllable_word(word):
+            return word
+        else:
+            return ", ".join(morpheme_rule_based(word))
