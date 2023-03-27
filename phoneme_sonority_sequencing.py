@@ -43,19 +43,22 @@ phoneme_weights = {
 def check_for_two_continuous_vowels_2(letters_dict):
     check = False
     position = -1
+    positions = []
     for i in range(len(letters_dict) - 1):
         type_letter_1 = letters_dict[i][1]
         type_letter_2 = letters_dict[i + 1][1]
         if type_letter_1 == type_letter_2 == 'vowel':
             check = True
-            position = i + 1
-    return check, position
+            position = i + len(positions) + 1
+            positions.append(position)
+    return check, positions
 
 
 def append_special_characters(word, letters_dict):
-    check, position = check_for_two_continuous_vowels_2(letters_dict)
+    check, positions = check_for_two_continuous_vowels_2(letters_dict)
     if check:
-        word = ''.join(word[:position]) + 'F' + ''.join(word[position:])
+        for position in positions:
+            word = ''.join(word[:position]) + 'F' + ''.join(word[position:])
     return 'S' + word + 'S'
 
 

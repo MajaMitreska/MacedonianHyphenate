@@ -195,6 +195,7 @@ def check_for_ski_stvo_stven(word, type=['morpheme', 'all']):
         if suffix == 'што' and suffix in word:
             return [split_by_suffix(word, suffix), [word]]
 
+
 def check_for_one_syllable_word(word):
     letters_dict = name_each_letter(list(word))
     letters_dict = check_for_samoglasno_r(letters_dict)
@@ -203,6 +204,7 @@ def check_for_one_syllable_word(word):
         return True
     else:
         return False
+
 
 def check_for_prefixes(word, prefixes):
     for prefix in prefixes:
